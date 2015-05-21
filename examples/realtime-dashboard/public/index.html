@@ -1,0 +1,233 @@
+<!doctype html>
+<html ng-app="App">
+	<head>
+		<title>Realtime Dashboard</title>
+		<link href="/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	</head>
+	<body ng-controller="DashboardCtrl">
+
+		<div class="container">
+			<h1>Realtime Dashboard</h1>
+			<p>Server: <a href="{{serverAddress}}">{{serverAddress}}</a></p>
+
+			<div id="chart" dashboard-chart data="votes"></div>
+
+			<div>
+				<button type="button" class="btn btn-default" ng-click="voteRed()">
+					Vote Red!
+				</button>
+				<button type="button" class="btn btn-default" ng-click="voteGreen()">
+					Vote Green!
+				</button>
+				<button type="button" class="btn btn-default" ng-click="voteBlue()">
+					Vote Blue!
+				</button>
+				<button type="button" class="btn btn-default" ng-click="reset()">
+					Reset!
+				</button>
+			</div>
+
+		<script src="/angular.min.js"></script>
+		<script src="/d3.v3.min.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<script>
+/*
+TODO:
+
+Show a bar chart of votes
+
+Update the chart when new data comes in
+
+*/
+
+var app = angular.module('App', []);
+
+app.controller('DashboardCtrl', ['$scope', function($scope) {
+
+	$scope.votes = [];
+	$scope.serverAddress = "http://0.0.0.0:3000/";
+
+	//Connect to the socket server.
+	var socket = io();
+	socket.on('votes', function(votes) {
+		$scope.$apply(function() {
+			// console.log("Votes updated: ", votes);
+			$scope.votes = votes;
+		});
+	});
+	socket.on('server', function(serverAddress) {
+		$scope.$apply(function() {
+			$scope.serverAddress = serverAddress;
+		});
+	});
+
+	//These listeners send commands back to the server.
+
+	$scope.voteRed = function() {
+		socket.emit('vote', 'Red');
+	};
+
+	$scope.voteGreen = function() {
+		socket.emit('vote', 'Green');
+	};
+
+	$scope.voteBlue = function() {
+		socket.emit('vote', 'Blue');
+	};
+
+	$scope.reset = function() {
+		socket.emit('reset');
+	};
+
+}]);
+
+app.directive("dashboardChart", [function() {
+	return {
+		restrict: "A",
+		scope: {
+			data: "=",
+			sort: "="
+		},
+		link: function(scope, element, attrs) {
+
+			//Some customization.
+
+			var leftPadding = 10;
+			var rightPadding = 10;
+			var topPadding = 0;
+			var bottomPadding = 10;
+
+			var barHeight = 40;
+			var barSpacing = 4;
+			var minXScale = 5;
+			var ticks = 6;
+
+			var width = d3.select(element[0]).node().offsetWidth;
+			var height = 180;
+
+			var colors = ["#B2150A", "#0EB512", "#216AB2"];
+
+			//Keep track of the state of the chart.
+			var isRendered = false;
+
+			var svg = d3.select(element[0])
+				.append("svg")
+				.style({
+					"width": "100%",
+					"height": height
+				});
+
+			var xScale = d3.scale.linear()
+				.domain([0, minXScale]) //the max value here will increase with the maximum
+				.range([0, width - leftPadding - rightPadding]);
+
+			var xAxis = d3.svg.axis(xScale)
+				.scale(xScale)
+				.orient("bottom")
+				.ticks(ticks);
+
+			scope.$watch("data", function() {
+				//We've got new data in the scope!
+				if (!isRendered) {
+					//We need to render for the first time.
+					scope.render(scope.data);
+					isRendered = true;
+				} else {
+					//We don't need to render the whole thing again!
+					scope.update();
+				}
+			});
+
+			scope.render = function(data) {
+				// remove all previous items before render
+				svg.selectAll('*').remove();
+
+				// If we don't pass any data, return out of the element
+				if (!data) return;
+
+				var maxScore = d3.max(data, function(d) {
+					return d.score;
+				});
+
+				var xOffset = leftPadding;
+				var yOffset = ((barHeight + barSpacing) * 3);
+				svg.append("g")
+					.attr("class", "axis")
+					.attr("transform", "translate("+xOffset+","+yOffset+")")
+					.call(xAxis);
+			};
+
+			scope.update = function() {
+
+				console.log("update()", scope.data.map(function(d) {
+					return d.count;
+				}));
+
+				var rectangles = svg.selectAll('rect')
+					.data(scope.data);
+
+				//Create new rectangles.
+				rectangles.enter()
+					.append('rect')
+					.attr('x', leftPadding)
+					.attr('width', 0)
+					.attr('y', function(d, i) {
+						return i * (barHeight + barSpacing) + topPadding;
+					})
+					.attr('height', barHeight)
+					.attr('fill', function(d, i) {
+						return colors[i % colors.length];
+						//return colorScale(d.score);
+					});
+
+				//Now that the max has changed, update the scale.
+				updateXScale();
+
+				//Animate the changes in vote counts.
+				rectangles
+					.transition()
+					.duration(300)
+					.attr('width', function(d) {
+						return xScale(d.count);
+					});
+
+				//Animate the axis too.
+				svg.select('.axis')
+					.transition()
+					.duration(300)
+					.call(xAxis);
+			};
+
+			var updateXScale = function() {
+				var maxVotes = d3.max(scope.data, function(d) {
+					return d.count;
+				});
+				var high = (maxVotes > minXScale ? maxVotes : minXScale);
+				xScale.domain([0, high]);
+			};
+
+		}
+	};
+}]);
+
+
+		</script>
+		<style type="text/css">
+
+/* TODO: move into style.css */
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: black;
+	shape-rendering: crispEdges;
+}
+
+.axis text {
+	font-family: sans-serif;
+	font-size: 11px;
+}
+
+		</style>
+	</body>
+</html>
