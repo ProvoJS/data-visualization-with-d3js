@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+	<head>
+		<title>04-interactions</title>
+		<link href="../../lib/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	</head>
+	<body>
+
+		<div class="container">
+			<h1>04-interactions</h1>
+
+			<div id="chart"></div>
+
+            <h2 id="notification" class="well">
+            </h2>
+		</div>
+
+		<script src="../../lib/d3.v3.min.js"></script>
+		<script>
+
+//Now each data point is an object instead of a single number.
+var data = [
+    {
+        name: "Red",
+		colorCode: "#B2150A",
+        count: 2
+    },
+    {
+        name: "Green",
+		colorCode: "#0EB512",
+        count: 3
+    },
+    {
+        name: "Blue",
+		colorCode: "#216AB2",
+        count: 1
+    }
+];
+
+var xPadding = 10;
+
+var maxCount = d3.max(data, function(d) {
+	return d.count;    //We can use a higher-order function to find the max value.
+});
+
+var xScale = d3.scale.linear()
+	.domain([0, maxCount])
+	.range([0, 600]);
+
+var svg = d3.select("#chart")
+    .append("svg")
+    .attr("width", "100%")
+    .attr("height", 200);
+
+var xAxis = d3.svg.axis(xScale)
+	.scale(xScale)
+	.orient("bottom")
+	.ticks(4);
+
+svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(" + xPadding + ",132)")
+    .call(xAxis);
+
+svg.selectAll("rect")
+	.data(data)
+	.enter()
+	.append("rect")
+    .on("mouseover", function(d) {
+        console.log("mouseover", d);
+        d3.select("#notification").text(d.name + ": " + d.count);
+    })
+    .on("mouseout", function(d) {
+        d3.select("#notification").text("");
+    })
+	.attr("x", xPadding)
+	.attr("y", function(d, i) {
+		return (40 + 4) * i;
+	})
+    .attr("width", 0)
+	.attr("height", 40)
+	.attr("fill", function(d) {    //Each data point d is an object now.
+        return d.colorCode;
+    })
+    .transition()
+    .duration(500)
+	.attr("width", function(d) {
+		return xScale(d.count);
+	});
+
+		</script>
+		<style type="text/css">
+
+/* TODO: move into style.css */
+
+#notification {
+    height: 7rem;
+}
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: black;
+	shape-rendering: crispEdges;
+}
+.axis text {
+	font-family: sans-serif;
+	font-size: 11px;
+}
+
+		</style>
+	</body>
+</html>

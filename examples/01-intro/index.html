@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+	<head>
+		<title>01-intro</title>
+		<link href="../../lib/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	</head>
+	<body>
+
+		<div class="container">
+			<h1>01-intro</h1>
+
+			<div id="chart"></div>
+		</div>
+
+		<script src="../../lib/d3.v3.min.js"></script>
+		<script>
+
+//Here's our dataset.
+var data = [2, 3, 1];
+
+//Everything in D3 is SVG-based, so create an SVG element inside of our chart div.
+var svg = d3.select("#chart")
+	.append("svg")
+	.attr("width", "100%")
+	.attr("height", 200);
+
+//Draw a rectangle for each data point.
+svg.selectAll("rect")
+	.data(data)
+	.enter()	//The function calls after enter() will be called once for each data point.
+	.append("rect")
+	.attr("fill", "#216AB2")
+	.attr("x", 0)	//Each element's x-value will be 0.
+	.attr("height", 40)
+	.attr("y", function(d, i) {		//Each element's y value will be determined by this function.
+		//d is the data point, i is the index.
+		return (40 + 4) * i;
+	})
+	.attr("width", function(d) {
+		return 200 * d
+	});
+
+		</script>
+	</body>
+</html>
