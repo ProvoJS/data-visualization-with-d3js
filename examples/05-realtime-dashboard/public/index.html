@@ -26,19 +26,12 @@
 					Reset!
 				</button>
 			</div>
+		</div>
 
 		<script src="/angular.min.js"></script>
 		<script src="/d3.v3.min.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
-/*
-TODO:
-
-Show a bar chart of votes
-
-Update the chart when new data comes in
-
-*/
 
 var app = angular.module('App', []);
 
@@ -51,7 +44,7 @@ app.controller('DashboardCtrl', ['$scope', function($scope) {
 	var socket = io();
 	socket.on('votes', function(votes) {
 		$scope.$apply(function() {
-			// console.log("Votes updated: ", votes);
+			console.log("Votes updated: ", votes);
 			$scope.votes = votes;
 		});
 	});
@@ -105,8 +98,6 @@ app.directive("dashboardChart", [function() {
 			var width = d3.select(element[0]).node().offsetWidth;
 			var height = 180;
 
-			var colors = ["#B2150A", "#0EB512", "#216AB2"];
-
 			//Keep track of the state of the chart.
 			var isRendered = false;
 
@@ -145,10 +136,6 @@ app.directive("dashboardChart", [function() {
 				// If we don't pass any data, return out of the element
 				if (!data) return;
 
-				var maxScore = d3.max(data, function(d) {
-					return d.score;
-				});
-
 				var xOffset = leftPadding;
 				var yOffset = ((barHeight + barSpacing) * 3);
 				svg.append("g")
@@ -175,9 +162,8 @@ app.directive("dashboardChart", [function() {
 						return i * (barHeight + barSpacing) + topPadding;
 					})
 					.attr('height', barHeight)
-					.attr('fill', function(d, i) {
-						return colors[i % colors.length];
-						//return colorScale(d.score);
+					.attr('fill', function(d) {
+						return d.colorCode;
 					});
 
 				//Now that the max has changed, update the scale.

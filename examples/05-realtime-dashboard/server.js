@@ -15,14 +15,17 @@ app.get('/', function (req, res) {
 var votes = [
     {
         name: "Red",
+		colorCode: "#B2150A",
         count: 2
     },
     {
         name: "Green",
+		colorCode: "#0EB512",
         count: 3
     },
     {
         name: "Blue",
+		colorCode: "#216AB2",
         count: 1
     }
 ];
