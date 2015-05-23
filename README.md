@@ -4,7 +4,7 @@ Examples and resources to help get started into interactive data visualization w
 
 ## Examples
 
-  1. Intro: data(), enter(), attributes
+  1. Intro
   2. Scales and Axes
   3. Transitions
   4. Interactions
