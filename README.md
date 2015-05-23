@@ -4,17 +4,17 @@ Examples and resources to help get started into interactive data visualization w
 
 ## Examples
 
-  # Intro: data(), enter(), attributes
-  # Scales and Axes
-  # Transitions
-  # Interactions
-  # Realtime Dashboard App
+  1. Intro: data(), enter(), attributes
+  2. Scales and Axes
+  3. Transitions
+  4. Interactions
+  5. Realtime Dashboard App
 
 ## Running the Realtime Dashboard App
 
 You'll need to start a NodeJS server to run the app:
 
-```bash
+```
 cd examples/05-realtime-dashboard/
 npm install
 node server.js
