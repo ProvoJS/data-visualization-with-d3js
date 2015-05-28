@@ -27,3 +27,4 @@ Then navigate to `http://localhost:3000` in your web browser.
  - [d3js.org - Documentation and examples](http://d3js.org/)
  - [Great free eBook by Scott Murray](http://chimera.labs.oreilly.com/books/1230000000345/index.html)
  - [Examples by Mike Bostock, the creator of D3](http://bl.ocks.org/mbostock)
+ - [Three Little Circles by Mike Bostock](http://bost.ocks.org/mike/circles/)
